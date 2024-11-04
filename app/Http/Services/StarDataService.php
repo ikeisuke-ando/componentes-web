@@ -28,6 +28,46 @@ class StarDataService {
         return $data;
     }
 
+    public function createFilters($request, $options)
+    {
+        //Agrupar
+        $filters['groupBy']['name'] = 'Agrupar por';
+        $filters['groupBy']['data'] = $request->query('Agrupar_por', $options['groupBy'][0]);
+
+        //Tipos de filtro
+        $filters['type']['name'] = 'Tipo';
+        $filters['type']['data'] = $request->query('Tipo', $options['type'][0]);
+
+        //Tempo
+        $filters['timeRange']['name'] = 'Intervalo de tempo';
+        $filters['timeRange']['data'] = $request->query('Intervalo_de_tempo', $options['timeRange'][0]);
+        return $filters;
+    }
+
+    public function getFiltersOptions()
+    {
+        $filtersOptions['groupBy'] = [
+            'Dia',
+            'Semana',
+            'Mes',
+            'Ano',
+        ];
+
+        $filtersOptions['type'] = [
+            'Cumulativo',
+            'Absoluto',
+        ];
+
+        $filtersOptions['timeRange'] = [
+            'Todo o período',
+            'Últimos 30 Dias',
+            'Últimos 6 Meses',
+            'Último Ano',
+        ];
+
+        return $filtersOptions;
+    }
+
     public function getHighlightedUsers($data)
     {
         $highlightedUsers = array_slice($data, 0, 5);
@@ -44,20 +84,20 @@ class StarDataService {
         $groupedData = $this->groupByPeriod($filteredData, $groupBy);
 
         // Calcular valor cumulativo ou absoluto
-        return $type === 'cumulative' ? $this->calculateCumulative($groupedData) : $groupedData;
+        return $type === 'Cumulativo' ? $this->calculateCumulative($groupedData) : $groupedData;
     }
 
     private function filterByTimeRange(array $data, string $timeRange)
     {
         $endDate = Carbon::now();
         switch ($timeRange) {
-            case '30_days':
+            case 'últimos 30 Dias':
                 $startDate = $endDate->copy()->subDays(30);
                 break;
-            case '6_months':
+            case 'Últimos 6 Meses':
                 $startDate = $endDate->copy()->subMonths(6);
                 break;
-            case '1_year':
+            case 'Último Ano':
                 $startDate = $endDate->copy()->subYear();
                 break;
             default:
@@ -80,10 +120,10 @@ class StarDataService {
 
             $date = Carbon::parse($star['starred_at']);
             $key = match($groupBy) {
-                'day' => $date->format('Y-m-d'),
-                'week' => $date->format('o-W'), // ISO-8601 week number
-                'month' => $date->format('Y-m'),
-                'year' => $date->format('Y'),
+                'Dia' => $date->format('Y-m-d'),
+                'Semana' => $date->format('o-W'),
+                'Mes' => $date->format('Y-m'),
+                'Ano' => $date->format('Y'),
                 default => $date->format('Y-m-d'),
             };
             $grouped[$key] = ($grouped[$key] ?? 0) + 1;

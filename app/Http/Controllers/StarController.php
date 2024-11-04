@@ -19,17 +19,14 @@ class StarController extends Controller
 
     public function index(Request $request, $sample)
     {
-
-        $groupBy = $request->input('groupBy', 'day');       // Valores possíveis: 'day', 'week', 'month', 'year'
-        $type = $request->input('type', 'cumulative');      // Valores possíveis: 'cumulative', 'absolute'
-        $timeRange = $request->input('timeRange', 'all');   // Valores possíveis: 'all', '30_days', '6_months', '1_year'
-
+        $options = $this->starDataService->getFiltersOptions();
+        $filters = $this->starDataService->createFilters($request, $options);
         $data = $this->starDataService->getStarData($sample);
-        $filteredData = $this->starDataService->applyFilters($data, $groupBy, $type, $timeRange);
+        $filteredData = $this->starDataService->applyFilters($data, $filters['groupBy']['data'],  $filters['type']['data'],  $filters['timeRange']['data']);
         $users = $this->starDataService->getHighlightedUsers($data);
         $chart = $this->createChart($data, $filteredData);
 
-        return view('index', compact('filteredData', 'groupBy', 'type', 'timeRange', 'users', 'chart'));
+        return view('index', compact('filteredData', 'filters', 'users', 'chart', 'options'));
     }
 
     public function createChart($data, $filteredData) {

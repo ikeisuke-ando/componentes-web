@@ -8,15 +8,15 @@ use Illuminate\View\Component;
 
 class FilterComponent extends Component
 {
-
+    public $filters;
     public $options;
 
     /**
      * Create a new component instance.
      */
-    public function __construct(array $options = [])
+    public function __construct(array $filters = [], array $options = [])
     {
-        //
+        $this->filters = $filters;
         $this->options = $options;
     }
 
